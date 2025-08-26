@@ -40,8 +40,8 @@ export default async function Page( props: {params: Promise<{ slug?: string[] }>
 
         <hr></hr>
 
-        <h3>The Details</h3>
-        
+        <h2>The Details</h2>
+
         {/* Sphinx-Generated HTML */}
         <div dangerouslySetInnerHTML={{__html: page.data.body}}></div>
 
