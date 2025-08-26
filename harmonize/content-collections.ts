@@ -5,7 +5,7 @@ import {
   transformMDX,
 } from '@fumadocs/content-collections/configuration';
 
-import { apiDocs } from './sphinx/content-collections';
+import { apiDocsProperties } from './sphinx/content-collections';
 
 const docs = defineCollection({
   name: 'docs',
@@ -22,6 +22,8 @@ const metas = defineCollection({
   parser: 'json',
   schema: createMetaSchema,
 });
+
+const apiDocs = defineCollection(apiDocsProperties);
 
 
 
