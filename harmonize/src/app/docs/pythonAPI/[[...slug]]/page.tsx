@@ -14,7 +14,7 @@ export default async function Page( props: {params: Promise<{ slug?: string[] }>
 {
     const params = await props.params;
 
-    let updatedPath = [`pythonAPI/${params.slug}`]
+    const updatedPath = [`pythonAPI/${params.slug}`]
 
     // const page = source.getPage(updatedPath);
     // console.log(`Inside the PythonAPI Page: ${updatedPath}`);
