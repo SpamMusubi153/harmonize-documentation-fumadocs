@@ -2,10 +2,10 @@ import { defineCollection, defineConfig } from '@content-collections/core';
 import {
   createMetaSchema,
   createDocSchema,
-  createAPIDocsSchema,
   transformMDX,
 } from '@fumadocs/content-collections/configuration';
-import { z } from "zod";
+
+import { apiDocs } from './sphinx/content-collections';
 
 const docs = defineCollection({
   name: 'docs',
@@ -23,14 +23,8 @@ const metas = defineCollection({
   schema: createMetaSchema,
 });
 
-const apiDocs = defineCollection({
-  name: 'apiDocs',
-  directory: 'content/apiDocs',
-  include: '**/*.fjson',
-  parser: 'json',
-  schema: createAPIDocsSchema,
-});
+
 
 export default defineConfig({
-  collections: [docs, metas],
+  collections: [docs, metas, apiDocs],
 });
