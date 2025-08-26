@@ -7,10 +7,10 @@ import { createJSONSource } from '../../sphinx/source';
 
 // console.log(allMetas)
 
-let mdxSource = createMDXSource(allDocs, allMetas);
-let jsonSource = createJSONSource(allApiDocs, allMetas);
+const mdxSource = createMDXSource(allDocs, allMetas);
+const jsonSource = createJSONSource(allApiDocs, allMetas);
 
-let unifiedSource = {
+const unifiedSource = {
   files: [
     ...mdxSource.files,
     ...jsonSource,
