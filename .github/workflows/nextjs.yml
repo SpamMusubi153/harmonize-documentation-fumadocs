@@ -35,7 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Pull out Next.js/Fumadocs files
-        run: mv ${{ github.workspace }}/* ./
+        run: mv ./harmonize ./harmonize-folder && mv ./harmonize-folder/* ./
       - name: Detect package manager
         id: detect-package-manager
         run: |
