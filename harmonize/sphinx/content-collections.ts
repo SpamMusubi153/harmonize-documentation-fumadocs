@@ -26,7 +26,7 @@ const apiDocsSchema = z.object({
 // // Also "passthrough" any other unaddressed and remaining properties.
 // }).passthrough();
 
-async function processApiDocs(document, {cache} ){
+async function processApiDocs(document: { toc: any; body: any; title: any; _meta: any; }, {cache}: any ){
 
   // current_page_name: z.string(),
 
@@ -34,7 +34,7 @@ async function processApiDocs(document, {cache} ){
 
   const toc = await cache(
     document.toc,
-    async (toc) => {
+    async (toc: string) => {
       // Remove the repeated header title.
       // - The "s" flag after the closing backward slash allows the dot (.) wildcard to match all characters
       // - (including newlines).
@@ -47,7 +47,7 @@ async function processApiDocs(document, {cache} ){
 
   const body = await cache(
     document.body,
-    async (body) => {
+    async (body: string) => {
       return body.replace(/<h1>.*<\/h1>/, "");
     }
   );
@@ -77,7 +77,7 @@ const apiDocsProperties = {
   include: '**/*.fjson',
   parser: 'json',
   schema: apiDocsSchema,
-  onSuccess: (docs) => {
+  onSuccess: (docs: string | any[]) => {
     console.log(`Generated a collection of API documents containing ${docs.length} item${(docs.length == 1) ? "" : "s"}!`);
     // console.log(docs[0]);
   },
