@@ -36,7 +36,7 @@ export default async function Page( props: {params: Promise<{ slug?: string[] }>
         {/* <h3>At a Glance</h3> */}
 
         {/* Table of Contents */}
-        <div dangerouslySetInnerHTML={{__html: page.data.toc}}></div>
+        <div dangerouslySetInnerHTML={{__html: page.data.htmltoc}}></div>
 
         <hr></hr>
 
@@ -58,6 +58,7 @@ export default async function Page( props: {params: Promise<{ slug?: string[] }>
 }
 
 export function generateStaticParams() {
+  console.log(source.generateParams())
   return source.generateParams();
 }
 
