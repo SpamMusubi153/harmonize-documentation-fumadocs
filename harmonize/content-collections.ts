@@ -26,7 +26,6 @@ const metas = defineCollection({
 const apiDocs = defineCollection(apiDocsProperties);
 
 
-
 export default defineConfig({
   collections: [docs, metas, apiDocs],
 });

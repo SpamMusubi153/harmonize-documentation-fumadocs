@@ -9,30 +9,28 @@ const linkTitleSchema = z.object({
 // Custom-Implemented for Handling Sphinx Documentation
 const apiDocsSchema = z.object({
     title: z.string(),
-    // meta: z.string(),
-    // description: z.string(),
-    current_page_name: z.string(),
-
+    description: z.string().optional(),
+    // content: z.string(),
+    toc: z.string().optional(),
+    htmltoc: z.string().optional(),
+    // structuredData: 
+    
     body: z.string(),
 
-    prev: linkTitleSchema.optional(),
-    next: linkTitleSchema.optional(),
+    // meta: z.string(),
     // Icon? _openapi?
     // full: z.ZodOptional<z.ZodBoolean>;
     // _openapi: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
+})
 
-// Also "passthrough" any other unaddressed and remaining properties.
-}).passthrough();
+// // Also "passthrough" any other unaddressed and remaining properties.
+// }).passthrough();
 
 async function processApiDocs(document, {cache} ){
 
+  // current_page_name: z.string(),
+
   // console.log(document)
-  const body = await cache(
-    document.body,
-    async (body) => {
-      return body.replace(/<h1>.*<\/h1>/, "");
-    }
-  );
 
   const toc = await cache(
     document.toc,
@@ -47,11 +45,28 @@ async function processApiDocs(document, {cache} ){
     }
   );
 
+  const body = await cache(
+    document.body,
+    async (body) => {
+      return body.replace(/<h1>.*<\/h1>/, "");
+    }
+  );
+
   const newObject = {
-    ...document,
-    body,
-    toc
+    title: document.title,
+    // description: ,
+    // toc: ,
+    htmltoc: toc,
+    body: body,
+
+    _meta: document._meta,
+
+    // ...document,
+    // body,
+    // toc
   };
+
+  // console.log("!!", newObject._meta)
 
   return newObject;
 }
@@ -71,12 +86,12 @@ async function processApiDocs(document, {cache} ){
 
 const apiDocsProperties = {
   name: 'apiDocs',
-  directory: 'content/docs/pythonAPI',
+  directory: 'content/docs',
   include: '**/*.fjson',
   parser: 'json',
   schema: apiDocsSchema,
   onSuccess: (docs) => {
-    console.log(`Generated a collection with ${docs.length} items!`);
+    console.log(`Generated a collection of API documents containing ${docs.length} item${(docs.length == 1) ? "" : "s"}!`);
     // console.log(docs[0]);
   },
   transform: processApiDocs,
