@@ -71,19 +71,6 @@ async function processApiDocs(document, {cache} ){
   return newObject;
 }
 
-// const apiDocs = defineCollection({
-//   name: 'apiDocs',
-//   directory: 'content/docs/pythonAPI',
-//   include: '**/*.fjson',
-//   parser: 'json',
-//   schema: apiDocsSchema,
-//   onSuccess: (docs) => {
-//     console.log(`Generated a collection with ${docs.length} items!`);
-//     // console.log(docs[0]);
-//   },
-//   transform: processApiDocs,
-// });
-
 const apiDocsProperties = {
   name: 'apiDocs',
   directory: 'content/docs',
@@ -97,4 +84,6 @@ const apiDocsProperties = {
   transform: processApiDocs,
 };
 
-export { apiDocsProperties }
+const apiDocs = defineCollection(apiDocsProperties)
+
+export { apiDocs }
