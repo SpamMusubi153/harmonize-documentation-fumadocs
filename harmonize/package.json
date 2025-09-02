@@ -8,26 +8,27 @@
     "start": "next start"
   },
   "dependencies": {
+    "@content-collections/core": "^0.10.0",
+    "@content-collections/mdx": "^0.2.2",
+    "@content-collections/next": "^0.2.6",
+    "@fumadocs/content-collections": "1.2.1",
+    "@orama/orama": "^3.1.12",
+    "fumadocs-core": "15.6.12",
+    "fumadocs-ui": "15.6.12",
     "next": "15.4.6",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "fumadocs-ui": "15.6.12",
-    "fumadocs-core": "15.6.12",
-    "@content-collections/mdx": "^0.2.2",
-    "@content-collections/core": "^0.10.0",
-    "@content-collections/next": "^0.2.6",
-    "@fumadocs/content-collections": "1.2.1"
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.1.12",
+    "@types/mdx": "^2.0.13",
     "@types/node": "24.3.0",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
-    "typescript": "^5.9.2",
-    "@types/mdx": "^2.0.13",
-    "@tailwindcss/postcss": "^4.1.12",
-    "tailwindcss": "^4.1.12",
-    "postcss": "^8.5.6",
     "eslint": "^8",
-    "eslint-config-next": "15.4.6"
+    "eslint-config-next": "15.4.6",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.12",
+    "typescript": "^5.9.2"
   }
 }
