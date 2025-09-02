@@ -1,13 +1,14 @@
 import { defineCollection, defineConfig } from '@content-collections/core';
 import { z } from 'zod';
 
-const linkTitleSchema = z.object({
-  "link": z.string(),
-  "title": z.string(),
-});
+// const linkTitleSchema = z.object({
+//   "link": z.string(),
+//   "title": z.string(),
+// });
 
 // Custom-Implemented for Handling Sphinx Documentation
 const apiDocsSchema = z.object({
+
     title: z.string(),
     description: z.string().optional(),
     // content: z.string(),
@@ -26,50 +27,13 @@ const apiDocsSchema = z.object({
 // // Also "passthrough" any other unaddressed and remaining properties.
 // }).passthrough();
 
-async function processApiDocs(document: { toc: any; body: any; title: any; _meta: any; }, {cache}: any ){
-
-  // current_page_name: z.string(),
-
-  // console.log(document)
-
-  const toc = await cache(
-    document.toc,
-    async (toc: string) => {
-      // Remove the repeated header title.
-      // - The "s" flag after the closing backward slash allows the dot (.) wildcard to match all characters
-      // - (including newlines).
-      toc = toc.replace(/^<ul>.*module<\/a>/s, "");
-      toc = toc.replace(/<\/ul>.*$/s, "")
-
-      return toc
-    }
-  );
-
-  const body = await cache(
-    document.body,
-    async (body: string) => {
-      return body.replace(/<h1>.*<\/h1>/, "");
-    }
-  );
-
-  const newObject = {
-    title: document.title,
-    // description: ,
-    // toc: ,
-    htmltoc: toc,
-    body: body,
-
-    _meta: document._meta,
-
-    // ...document,
-    // body,
-    // toc
-  };
-
-  // console.log("!!", newObject._meta)
-
-  return newObject;
-}
+// type meta = {
+//   filePath: string,
+//   fileName: string,
+//   directory: string,
+//   extension: string,
+//   path: string,
+// }
 
 const apiDocs = defineCollection({
   name: 'apiDocs',
@@ -77,11 +41,62 @@ const apiDocs = defineCollection({
   include: '**/*.fjson',
   parser: 'json',
   schema: apiDocsSchema,
-  onSuccess: (docs: string | any[]) => {
+  onSuccess: (docs) => {
     console.log(`Generated a collection of API documents containing ${docs.length} item${(docs.length == 1) ? "" : "s"}!`);
     // console.log(docs[0]);
   },
-  transform: processApiDocs,
+  transform: async (doc, { cache }) => {
+    const toc = await cache(
+        doc.toc || "",
+        async (toc: string) => {
+          // Remove the repeated header title.
+          // - The "s" flag after the closing backward slash allows the dot (.) wildcard to match all characters
+          // - (including newlines).
+          toc = toc.replace(/^<ul>.*module<\/a>/s, "");
+          toc = toc.replace(/<\/ul>.*$/s, "")
+
+          return toc
+        }
+      );
+
+      const body = await cache(
+        doc.body,
+        async (body: string) => {
+          return body.replace(/<h1>.*<\/h1>/, "");
+        }
+      );
+
+    const newObject = {
+      ...doc,
+      toc: "",
+      body,
+      
+      // title: document.title,
+      // // description: ,
+      // // toc: ,
+      htmltoc: toc,
+      // body: body,
+      _meta: doc._meta,
+
+      // _meta: document._meta,
+
+      // ...document,
+      // title: document.title,
+      // // description: ,
+      // // toc: ,
+      // htmltoc: toc,
+      // body: body,
+
+      // _meta: document._meta,
+
+      // // ...document,
+      // // body,
+      // // toc
+    };
+
+    return newObject;
+
+  },
 })
 
 export { apiDocs }

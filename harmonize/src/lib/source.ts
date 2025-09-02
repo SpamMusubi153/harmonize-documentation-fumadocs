@@ -5,14 +5,22 @@ import { createMDXSource } from '@fumadocs/content-collections';
 import { allApiDocs } from 'content-collections';
 import { createJSONSource } from '../../sphinx/source';
 
+// import { Source } from 'fumadocs-core/source';
+
 // console.log(allMetas)
 
 const mdxSource = createMDXSource(allDocs, allMetas);
 const jsonSource = createJSONSource(allApiDocs, allMetas);
 
+// console.log(mdxSource)
+
+// function unifySource(mdxSource: any, jsonSource: any) : Source<undefined>
+
 const unifiedSource = {
   files: [
-    ...mdxSource.files,
+    // For some reason, the mdxsource might return a function containing files.
+    // TODO: Determine the underlying reason.
+    ...(typeof mdxSource.files === "function"? mdxSource.files() : mdxSource.files),
     ...jsonSource,
   ]
 }

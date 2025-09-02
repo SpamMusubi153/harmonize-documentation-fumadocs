@@ -1,8 +1,8 @@
-function createJSONSource(allJSONDocs, allMeta){
+function createJSONSource(allJSONDocs: any, allMeta: any){
 
     // TODO: Handle Cases where metadata already exists for a file.
     
-    let virtualJSONFiles = allJSONDocs.map(currentFile => {
+    let virtualJSONFiles = allJSONDocs.map((currentFile: any) => {
 
         let newObject = {
             // Retain all existing properties of the file object.
