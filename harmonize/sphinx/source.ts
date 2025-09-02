@@ -16,6 +16,7 @@ function createJSONSource(allJSONDocs: any, allMeta: any){
                 title: currentFile.title,
                 description: currentFile.description,
                 body: currentFile.body,
+                content: currentFile.body,
 
                 htmltoc: currentFile.htmltoc,
 
