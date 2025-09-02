@@ -71,7 +71,7 @@ async function processApiDocs(document: { toc: any; body: any; title: any; _meta
   return newObject;
 }
 
-const apiDocsProperties = {
+const apiDocs = defineCollection({
   name: 'apiDocs',
   directory: 'content/docs',
   include: '**/*.fjson',
@@ -82,8 +82,6 @@ const apiDocsProperties = {
     // console.log(docs[0]);
   },
   transform: processApiDocs,
-};
-
-const apiDocs = defineCollection(apiDocsProperties)
+})
 
 export { apiDocs }
