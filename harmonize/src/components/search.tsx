@@ -22,12 +22,15 @@ function initOrama() {
   });
 }
 
-export default function DefaultSearchDialog(props: SharedProps) {
+export default function OfflineSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
   const { search, setSearch, query } = useDocsSearch({
     type: 'static',
     initOrama,
     locale,
+
+    from: "/harmonize-documentation-fumadocs/api/search"
+
   });
 
   return (
