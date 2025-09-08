@@ -23,16 +23,17 @@ function createJSONSource(allJSONDocs: any, allMeta: any){
 
                 _meta: currentFile._meta,
 
-                structuredData: {
-                    contents: [
-                        {
-                            heading: "",
-                            content: currentFile.body,
-                        }
-                    ],
-                    // Each heaing is in a dictionary in the list with a-unique-id "id" and title "content".
-                    headings: [ {} ],
-                }
+                structuredData: currentFile.structuredData,
+                // structuredData: {
+                //     contents: [
+                //         {
+                //             heading: "",
+                //             content: currentFile.body,
+                //         }
+                //     ],
+                //     // Each heaing is in a dictionary in the list with a-unique-id "id" and title "content".
+                //     headings: [ {} ],
+                // }
 
                 // ...currentFile
 
