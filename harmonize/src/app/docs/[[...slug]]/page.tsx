@@ -42,8 +42,8 @@ export default async function Page( props: { params: Promise<{ slug?: string[] }
 
   else if (pageExtension == "fjson"){
     return (
-      // <DocsPage toc={page.data.toc} full={page.data.full}>
-      <DocsPage full={page.data.full}>
+      <DocsPage toc={page.data.toc} full={page.data.full}>
+      {/* <DocsPage full={page.data.full}> */}
         <DocsTitle>{page.data.title}</DocsTitle>
         <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>
@@ -54,11 +54,11 @@ export default async function Page( props: { params: Promise<{ slug?: string[] }
           {/* <h3>At a Glance</h3> */}
 
           {/* Table of Contents */}
-          <div dangerouslySetInnerHTML={{__html: page.data.htmltoc}}></div>
+          {/* <div dangerouslySetInnerHTML={{__html: page.data.htmltoc}}></div> */}
 
-          <hr></hr>
+          {/* <hr></hr> */}
 
-          <h2>The Details</h2>
+          {/* <h2>The Details</h2> */}
 
           {/* Sphinx-Generated HTML */}
           <div dangerouslySetInnerHTML={{__html: page.data.body}}></div>

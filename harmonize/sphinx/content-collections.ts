@@ -58,35 +58,53 @@ const apiDocs = defineCollection({
         }
       );
 
-    const htmltoc = await cache(
-        doc.toc || "",
-        async (toc: string) => {
-          // Remove the repeated header title.
-          // - The "s" flag after the closing backward slash allows the dot (.) wildcard to match all characters
-          // - (including newlines).
-          toc = toc.replace(/^<ul>.*module<\/a>/s, "");
-          toc = toc.replace(/<\/ul>.*$/s, "")
+    const toc = await cache(
+      doc.toc || "",
+      async (toc: string) => {
+        
+        // Pull out data and function names.
+        let structuredTOC = [];
 
-          return toc
-        }
-      );
+        let matchRE = /<li><a class="reference internal" href="(.*?)"><code class="docutils literal notranslate"><span class="pre">(.*?)<\/span><\/code><\/a><\/li>/g;
 
-      const body = await cache(
-        doc.body,
-        async (body: string) => {
-          return body.replace(/<h1>.*<\/h1>/, "");
+        let currentMatch = matchRE.exec(toc);
+        while (currentMatch != undefined){
+          const currentLink = currentMatch[1];
+          const currentTitle = currentMatch[2];
+
+          structuredTOC.push({
+            "title": currentTitle,
+            "url": currentLink,
+            "depth": 2,
+          });
+
+          currentMatch = matchRE.exec(toc);
         }
-      );
+
+        return structuredTOC
+      }
+    );
+
+    // Remove the repeated header title.
+    // - The "s" flag after the closing backward slash allows the dot (.) wildcard to match all characters
+    // - (including newlines).
+    const htmltoc = doc.toc?.replace(/^<ul>.*module<\/a>/s, "").replace(/<\/ul>.*$/s, "");
+
+    const body = await cache(
+      doc.body,
+      async (body: string) => {
+        return body.replace(/<h1>.*<\/h1>/, "");
+      }
+    );
 
     const newObject = {
       ...doc,
       title,
-      toc: "",
+      toc,
       body,
       
       // title: document.title,
       // // description: ,
-      // // toc: ,
       htmltoc,
       // body: body,
       _meta: doc._meta,
