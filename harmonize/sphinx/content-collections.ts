@@ -14,7 +14,7 @@ const apiDocsSchema = z.object({
     // content: z.string(),
     toc: z.string().optional(),
     htmltoc: z.string().optional(),
-    // structuredData: 
+    structuredData: z.string().optional(),
     
     body: z.string(),
 
@@ -90,10 +90,50 @@ const apiDocs = defineCollection({
     // - (including newlines).
     const htmltoc = doc.toc?.replace(/^<ul>.*module<\/a>/s, "").replace(/<\/ul>.*$/s, "");
 
-    const body = await cache(
+    const [body, structuredData] = await cache(
       doc.body,
       async (body: string) => {
-        return body.replace(/<h1>.*<\/h1>/, "");
+
+        interface content {
+          heading: string,
+          content: string,
+        };
+
+        interface heading {
+          id: string,
+          content: string,
+        };
+
+        let structuredData : {contents: content[], headings:heading[]} = {
+          contents: [],
+          headings: [],
+        };
+
+        // Remove the leading body contents before the API Section.
+        body = body.replace(/^.*?API.*?h3>\n/s, "");
+
+        const sectionParseRE = /<dl.*?id="(.*?)".*?<dd>(.*?)<\/dd>/sg;
+
+        let currentMatch = sectionParseRE.exec(body);
+        while (currentMatch != undefined){
+
+          const currentHeading = currentMatch[1];
+          const currentContent = currentMatch[2].replace(/<.*?>/g, "").replace("\n", " ");
+
+          structuredData.contents.push({
+            "heading": currentHeading,
+            "content": currentContent,
+          });
+
+          structuredData.headings.push({
+            "id": currentHeading,
+            "content": currentHeading
+          });
+
+          currentMatch = sectionParseRE.exec(body);
+        }
+
+        return [body, structuredData];
       }
     );
 
@@ -108,6 +148,7 @@ const apiDocs = defineCollection({
       htmltoc,
       // body: body,
       _meta: doc._meta,
+      structuredData,
 
       // _meta: document._meta,
 
