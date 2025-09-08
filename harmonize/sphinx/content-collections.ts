@@ -46,7 +46,19 @@ const apiDocs = defineCollection({
     // console.log(docs[0]);
   },
   transform: async (doc, { cache }) => {
-    const toc = await cache(
+
+    const title = await cache(
+        doc.title || "",
+        async (title: string) => {
+          // Remove title formatting.
+          title = title.replace(/^<code.*"pre">/, "");
+          title = title.replace("</span></code>", "")
+
+          return title
+        }
+      );
+
+    const htmltoc = await cache(
         doc.toc || "",
         async (toc: string) => {
           // Remove the repeated header title.
@@ -68,13 +80,14 @@ const apiDocs = defineCollection({
 
     const newObject = {
       ...doc,
+      title,
       toc: "",
       body,
       
       // title: document.title,
       // // description: ,
       // // toc: ,
-      htmltoc: toc,
+      htmltoc,
       // body: body,
       _meta: doc._meta,
 
