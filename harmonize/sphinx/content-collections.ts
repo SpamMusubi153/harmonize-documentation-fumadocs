@@ -75,7 +75,7 @@ const apiDocs = defineCollection({
           structuredTOC.push({
             "title": currentTitle,
             "url": currentLink,
-            "depth": 2,
+            "depth": 3,
           });
 
           currentMatch = matchRE.exec(toc);
@@ -110,7 +110,8 @@ const apiDocs = defineCollection({
         };
 
         // Remove the leading body contents before the API Section.
-        body = body.replace(/^.*?API.*?h3>\n/s, "");
+        // Also remove the duplicate header provided by Fumadocs.
+        body = body.replace(/^.*?API.*?h3>\n/s, "").replace(/<h1>.*?<\/h1>/, "");
 
         const sectionParseRE = /<dl.*?id="(.*?)".*?<dd>(.*?)<\/dd>/sg;
 
