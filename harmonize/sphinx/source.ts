@@ -1,13 +1,17 @@
+
+// Here we create a "source" of JSON files in the Fumadocs-expected format.
+// This allows Fumadocs to know about our pages and handle them just like it can handle Markdown files.
 function createJSONSource(allJSONDocs: any, allMeta: any){
 
     // TODO: Handle Cases where metadata already exists for a file.
     
     let virtualJSONFiles = allJSONDocs.map((currentFile: any) => {
 
+        // Emulate the Fumadocs-expected format.
         let newObject = {
-            // Retain all existing properties of the file object.
+
+            // In case we need to retain all existing properties of the file object:
             // ...currentFile,
-            // path: `pythonAPI/${currentFile.path}`,
 
             type: "page",
             
@@ -24,6 +28,10 @@ function createJSONSource(allJSONDocs: any, allMeta: any){
                 _meta: currentFile._meta,
 
                 structuredData: currentFile.structuredData,
+
+
+                // For future reference, here are the expected format of Fumadocs "structuredData" and "_meta":
+
                 // structuredData: {
                 //     contents: [
                 //         {
@@ -35,9 +43,6 @@ function createJSONSource(allJSONDocs: any, allMeta: any){
                 //     headings: [ {} ],
                 // }
 
-                // ...currentFile
-
-                // Automatically Generated Metadata Format
                 // _meta: {
                 //     filePath: currentFilePath,
                 //     fileName: currentFileName,
