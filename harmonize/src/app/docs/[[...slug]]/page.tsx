@@ -48,6 +48,9 @@ export default async function Page( props: { params: Promise<{ slug?: string[] }
         <DocsDescription>{page.data.description}</DocsDescription>
         <DocsBody>
 
+          {/*  */}
+          {/*  */}
+          {/* The following is a legacy formatting approach for Sphinx-exported HTML. */}
           {/* <br></br> */}
           {/* <hr></hr> */}
 
@@ -59,23 +62,21 @@ export default async function Page( props: { params: Promise<{ slug?: string[] }
           {/* <hr></hr> */}
 
           {/* <h2>The Details</h2> */}
+          {/*  */}
+          {/*  */}
+
 
           {/* Sphinx-Generated HTML */}
           <div dangerouslySetInnerHTML={{__html: page.data.body}}></div>
 
-          {/* <MDXContent
-            code={page.data.body}
-            components={getMDXComponents({
-              // this allows you to link to other pages with relative file paths
-              a: createRelativeLink(source, page),
-            })}
-          /> */}
+          
         </DocsBody>
       </DocsPage>
     );
   }  
 }
 
+// This function allows Next.js to know what pages should be included in a static export of the site.
 export function generateStaticParams() {
   return source.generateParams();
 }

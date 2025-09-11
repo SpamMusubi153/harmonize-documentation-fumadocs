@@ -1,31 +1,25 @@
 import { defineCollection, defineConfig } from '@content-collections/core';
 import { z } from 'zod';
 
-// const linkTitleSchema = z.object({
-//   "link": z.string(),
-//   "title": z.string(),
-// });
-
 // Custom-Implemented for Handling Sphinx Documentation
 const apiDocsSchema = z.object({
 
     title: z.string(),
     description: z.string().optional(),
-    // content: z.string(),
+    
     toc: z.string().optional(),
     htmltoc: z.string().optional(),
     structuredData: z.string().optional(),
     
     body: z.string(),
 
+    // Additional Items that May be Needed in the Future:
+    // content: z.string(),
     // meta: z.string(),
     // Icon? _openapi?
     // full: z.ZodOptional<z.ZodBoolean>;
     // _openapi: z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodAny>>;
-})
-
-// // Also "passthrough" any other unaddressed and remaining properties.
-// }).passthrough();
+}); // We won't be calling .passthrough() at the moment, and will discard all unaddressed and remaining properties in the json.
 
 // type meta = {
 //   filePath: string,
@@ -35,6 +29,13 @@ const apiDocsSchema = z.object({
 //   path: string,
 // }
 
+// Here we define a "Content Collection" that processes and contains all of the *.fjson files exported by Sphinx.
+// As part of our processing, we add additional formating to our Sphinx outputs, and extract structured reprsentations
+// that are expected for Fumadocs tables of contents and search.
+
+// Files are processed in the following sequence:
+// Files on Disk            -> Ingestion and Transformation by Content Collections -> Re-Structuring as a Fumadocs Source -> Displayed by Next.js Under a Route
+// (content/docs/**.fjson)     (sphinx/content-collections.ts)                        (sphinx/source.ts)                     (src/app/docs/[[...slug]]/page.tsx)
 const apiDocs = defineCollection({
   name: 'apiDocs',
   directory: 'content/docs',
@@ -42,15 +43,17 @@ const apiDocs = defineCollection({
   parser: 'json',
   schema: apiDocsSchema,
   onSuccess: (docs) => {
-    console.log(`Generated a collection of API documents containing ${docs.length} item${(docs.length == 1) ? "" : "s"}!`);
-    // console.log(docs[0]);
+    // console.log(`Generated a collection of API documents containing ${docs.length} item${(docs.length == 1) ? "" : "s"}!`);
   },
+  // Here we handle transformations from Sphinx-provided content to equivalent Fumadocs-expected formats.
   transform: async (doc, { cache }) => {
 
+    // Remove title formatting provided by Sphinx.
+    // - Results are cached for later build reuse.
     const title = await cache(
         doc.title || "",
         async (title: string) => {
-          // Remove title formatting.
+          
           title = title.replace(/^<code.*"pre">/, "");
           title = title.replace("</span></code>", "")
 
@@ -58,56 +61,29 @@ const apiDocs = defineCollection({
         }
       );
 
-    // Legacy TOC Parsing
-    // let toc = await cache(
-    //   doc.toc || "",
-    //   async (toc: string) => {
-
-    //     // Pull out data and function names.
-    //     let structuredTOC = [];
-
-    //     let matchRE = /<li><a class="reference internal" href="(.*?)"><code class="docutils literal notranslate"><span class="pre">(.*?)<\/span><\/code><\/a><\/li>/g;
-
-    //     let currentMatch = matchRE.exec(toc);
-    //     while (currentMatch != undefined){
-    //       const currentLink = currentMatch[1];
-    //       const currentTitle = currentMatch[2];
-
-    //       structuredTOC.push({
-    //         "title": currentTitle,
-    //         "url": currentLink,
-    //         "depth": 3,
-    //       });
-
-    //       currentMatch = matchRE.exec(toc);
-    //     }
-
-    //     return structuredTOC
-    //   }
-    // );
-
-    // Remove the repeated header title.
+    // Remove the repeated header provided by Sphinx's native Table of Contents (toc).
     // - The "s" flag after the closing backward slash allows the dot (.) wildcard to match all characters
-    // - (including newlines).
+    //   (including newlines).
     const htmltoc = doc.toc?.replace(/^<ul>.*module<\/a>/s, "").replace(/<\/ul>.*$/s, "");
 
     // Process/Format the body and extract structured representations for the search indices and table of contents.
+    // - Results are cached for later build reuse.
     const [body, structuredData, toc] = await cache(
       doc.body,
       async (body: string) => {
 
-        // Specify the structure of:
-        // - structuredData: Used by the search provider to construct search indices for offline searching.
+        // Specify the type structure of:
+        // 1. structuredData: Used by the default search provider (Orama) to construct search indices for offline searching.
         let structuredData : {contents: {heading: string, content:string}[], headings:{id: string, content: string}[]} = {
           contents: [],
           headings: [],
         };
-        // - toc: Used by Fumadocs to generate a sidebar table of contents containing document headers.
+        // 2. toc: Used by Fumadocs to generate a sidebar table of contents containing document headers.
         type tocType = {title: string, url:string, depth:number, offset:number}[];
+
         let toc : tocType[] = [];
 
-        // Pre-Process the body by removing extraneous code exported by Sphinx.
-        // Remove the following:
+        // Pre-Process the body by removing extraneous header code exported by Sphinx. This removes the following:
         // - The leading body contents before the API Section
         // - The duplicate header provided by Sphinx (which will be be regenerated by Fumadocs)
         body = body.replace(/^.*?API.*?h3>\n/s, "").replace(/<h1>.*?<\/h1>/, "");
@@ -115,16 +91,16 @@ const apiDocs = defineCollection({
         // Rewrite Links to local paths.
         body = body.replace(/href="../g, "href=\"./");
 
+
         // 
         // Table of Contents Processing
         //
 
-        
-
         // Parse the Sphinx Table of Contents to extract appropriate names to display.
+        // This will extract things such as function and variable names.
         let matchRE = /<a class="reference internal" href="(.*?)"><code class="docutils literal notranslate"><span class="pre">(.*?)<\/span>/g;
-        // We're not truly replacing any matches; we're just using `replace` to cleanly apply a function over all of the matches.
-        doc.toc?.replace(matchRE, (match, currentLink, currentTitle) => {
+        // We're not truly replacing any matches; we're just using `replace` to cleanly apply a function over all of the regex matches.
+        doc.toc?.replace(matchRE, (match : string, currentLink : string, currentTitle : string) => {
 
           // Locate the current item inside the body to get a sense of its position relative to headers and other items.
           const currentLocation = body.indexOf(currentLink.substring(1));
@@ -141,23 +117,30 @@ const apiDocs = defineCollection({
         
         })
 
+
         // 
         // Body Processing
         // 
 
-        
-
-        // Extract Breathe Headings Previously Exported to HTML
-        function extractHeadings(text: string, tocDepth: number, startingOffset: number){
+        // A helper function that extracts and formats section headings from a chunk of Sphinx/Breathe-exported html code.
+        // - The tocDepth indicates the level at which the entry should be organized under the sidebar table of contents.
+        //     The first level under the table of contents corresponds to a tocDepth of 2.
+        // - The startingOffset should be the character index at which the current substring of text begins from the full body text.
+        //     This is used to determine the order of table of contents (toc) listings.
+        function processHeadings(text: string, tocDepth: number, startingOffset: number){
 
           let workingToc : tocType[] = [];
 
+          // A regular expression to extract section headers.
           const titleRE = /<p (class=.*?breathe-sectiondef.*?)id="(.*?)".*?>(.*?)<\/p>/g;
+
           const updatedText : string = text.replaceAll(titleRE, (match, other_attributes, id, title, offset) => {
 
             const fullOffset = offset + startingOffset;
 
-            // Append the current offset to ensure each toc entry links to a unique header.
+            // Append the current offset (expected to be unique) to ensure each toc entry links to a unique header.
+            // This is required, as some header names are repeated multiple times, once at the root level and again
+            // at sub-levels, such as within a struct or namespace.
             const newID = `${id}-${fullOffset}`
 
             workingToc.push({
@@ -183,39 +166,61 @@ const apiDocs = defineCollection({
             }
           });
 
+          // Return the generated table of contents entries
           return [workingToc, updatedText];
         }
 
-
         // Identify, Highlight/Format, and Record Breathe Sections.
+        // This is where we in fact call the processHeadings function.
         let extractedSubHeadingtocEntries : tocType[] = []
         body = body.replace(/<dd><div.*?<\/div>\n<\/dd>/gs, (match, offset) => {
 
           // Return early if the current item is empty.
+          // This occurs when the current header level does not contain additional documentation
+          // or sub-items.
           if (match == "<dd></dd>"){
             return match;
           }
 
-          const [newtocEntries, updatedContent] = extractHeadings(match, 3, offset);
+          // Otherwise, extract sub-toc entries from the current item.
+          const [newtocEntries, updatedContent] = processHeadings(match, 3, offset);
           
+          // Push all extracted toc entries to the full toc list.
           extractedSubHeadingtocEntries.push(...newtocEntries);
 
+          // Replace the corresponding section of the body with the updated, processed versions.
+          // TODO: We may wish to re-include the stripped <div></div> tags in the future.
           return updatedContent;
         });
 
-        const [primaryHeadings, updatedBody] = extractHeadings(body, 2, 0);
+        const [primaryHeadings, updatedBody] = processHeadings(body, 2, 0);
         body = updatedBody;
 
+        // Combine all sources of table of contents entries.
         toc = [
           ...toc,
           ...primaryHeadings,
           ...extractedSubHeadingtocEntries,
         ];
-        
-        
+
+        // Sort all toc entries by their body offset value to ensure the toc order matches the order at which
+        // entried appear in the main body.
+        toc.sort((a, b) => {
+          return a.offset - b.offset;
+        })
+
+
+        // 
+        // Processing for Search
+        // 
+
+        // Extract structured representations of the body content to allow generation of clean static search indices.
+      
         // Create a structured representation of each listed item for search.
         const sectionParseRE = /<dl.*?id="(.*?)".*?<dd>(.*?)<\/dd>/sg;
 
+        // Iterate over all matches. This iteration code is equivalent to the some of the regex code that uses "replace"
+        // to iterate over matches seen above.
         let currentMatch = sectionParseRE.exec(body);
         while (currentMatch != undefined){
 
@@ -235,41 +240,30 @@ const apiDocs = defineCollection({
           currentMatch = sectionParseRE.exec(body);
         }
 
-        toc.sort((a, b) => {
-          return a.offset - b.offset;
-        })
-
         return [body, structuredData, toc];
       }
     );
 
+
+    // 
+    // Provide Results
+    // 
+
+    // This is where we create and return a final object, the result of our Content Collections "transform" processing.
+    // The object we return is the final object that will be stored in our content collection and used for display by Fumadocs.
     const newObject = {
       ...doc,
       title,
       toc,
       body,
-      
-      // title: document.title,
-      // // description: ,
       htmltoc,
-      // body: body,
+
+      // Pass through the metadata (_meta) automatically generated by Content Collections.
       _meta: doc._meta,
       structuredData,
 
-      // _meta: document._meta,
-
-      // ...document,
-      // title: document.title,
-      // // description: ,
-      // // toc: ,
-      // htmltoc: toc,
-      // body: body,
-
-      // _meta: document._meta,
-
-      // // ...document,
-      // // body,
-      // // toc
+      // Additional Fumadocs-expected properties that may be included later:
+      // description: ,
     };
 
     return newObject;
