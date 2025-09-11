@@ -127,7 +127,7 @@ const apiDocs = defineCollection({
         doc.toc?.replace(matchRE, (match, currentLink, currentTitle) => {
 
           // Locate the current item inside the body to get a sense of its position relative to headers and other items.
-          const currentLocation = body.indexOf(currentLink);
+          const currentLocation = body.indexOf(currentLink.substring(1));
 
           // Push all of this information into the structured toc list.
           toc.push({
