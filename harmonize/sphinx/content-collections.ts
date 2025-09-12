@@ -89,7 +89,7 @@ const apiDocs = defineCollection({
         body = body.replace(/^.*?API.*?h3>\n/s, "").replace(/<h1>.*?<\/h1>/, "");
 
         // Rewrite Links to local paths.
-        body = body.replace(/href="../g, "href=\"./");
+        body = body.replace(/href="\.\.(.*?)\/([^/]*?)"/g, "href=\"./$1$2\"");
 
 
         // 
