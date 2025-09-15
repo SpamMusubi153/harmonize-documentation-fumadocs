@@ -1,0 +1,1 @@
+# Documentation is to be stored here, under content/docs.
