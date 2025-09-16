@@ -13,6 +13,7 @@
     "@content-collections/next": "^0.2.6",
     "@fumadocs/content-collections": "1.2.1",
     "@orama/orama": "^3.1.12",
+    "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-tabs": "^1.1.13",
     "class-variance-authority": "^0.7.1",
     "fumadocs-core": "15.6.12",
