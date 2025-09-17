@@ -40,7 +40,8 @@ function MermaidContent({ chart }: { chart: string }) {
     securityLevel: 'loose',
     fontFamily: 'inherit',
     themeCSS: 'margin: 1.5rem auto 0;',
-    theme: resolvedTheme === 'dark' ? 'dark' : 'default',
+    // theme: resolvedTheme === 'dark' ? 'dark' : 'default',
+    theme: resolvedTheme === 'dark' ? 'dark' : 'neutral',
   });
 
   const { svg, bindFunctions } = use(
